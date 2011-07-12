@@ -389,6 +389,8 @@ class RunningMean
     T mean(bool do_reset = false){float a_mean = vector_mean(d_values); if (do_reset) reset(); return a_mean;}
     T mean_first_half(bool do_reset = false){float a_mean = vector_mean(std::vector<float>(d_values.begin(), d_values.begin() + d_values.size() / 2)); if (do_reset) reset(); return a_mean;}
     T mean_second_half(bool do_reset = false){float a_mean = vector_mean(std::vector<float>(d_values.begin() + d_values.size() / 2, d_values.end())); if (do_reset) reset(); return a_mean;}
+
+    T std(){return vector_std(d_values);}
     void reset(){d_values.clear();}
     bool full(){return d_max_n == d_values.size();}
 };

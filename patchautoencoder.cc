@@ -66,9 +66,11 @@ void do_stuff()
   size_t n_epochs(context.get<size_t>("n_epochs"));
     
   float learning_rate(context.get<float>("learning_rate"));
+  float learning_rate_threshold(context.get<float>("learning_rate_threshold"));
   float l1_constant(context.get<float>("l1"));
   float noise(context.get<float>("noise"));
   float deviation(context.get<float>("deviation"));
+  float test_deviation(0.0);
   float radius(10);
 
   log("start loading");
@@ -77,7 +79,7 @@ void do_stuff()
   log("getting select file");
 
   string select_filename(save_dir + "autoencoder.select");
-  create_selection_file(select_filename, collection.size(), 0.666);
+  create_selection_file(select_filename, collection.size(), 2.0 / 3.0);
 
   ifstream select_file(select_filename.c_str());
   vector<bool> selection(byte_read_vector<bool>(select_file));
@@ -138,7 +140,7 @@ void do_stuff()
           Focus focus(data_element);
           float x = data_element.get_meta<float>(face_part + "_x");
           float y = data_element.get_meta<float>(face_part + "_y");
-          FocusState focus_state(x + get_random_uniform(0.0, deviation), y + get_random_uniform(0, deviation), radius);
+          FocusState focus_state(x + get_random_uniform(0.0, test_deviation), y + get_random_uniform(0, test_deviation), radius);
             
           vector<float> data = focus.focus_vector(focus_state);
           auto_encoder.activate(data);
@@ -158,7 +160,7 @@ void do_stuff()
           Focus focus(data_element);
           float x = data_element.get_meta<float>(face_part + "_x");
           float y = data_element.get_meta<float>(face_part + "_y");
-          FocusState focus_state(x + get_random_uniform(0.0, deviation), y + get_random_uniform(0, deviation), radius);
+          FocusState focus_state(x + get_random_uniform(0.0, test_deviation), y + get_random_uniform(0, test_deviation), radius);
           vector<float> data = focus.focus_vector(focus_state);
             
           auto_encoder.activate(data);
@@ -170,14 +172,20 @@ void do_stuff()
       running_mean_train_error.update(mean_train_error.mean());
       log2("train error: ", mean_train_error.mean());
       log2("test  error: ", mean_test_error.mean());
-      auto_encoder.print_l1_adjust_angles();
 
       if (running_mean_train_error.full() && 
           ((running_mean_train_error.mean_first_half() - running_mean_train_error.mean_second_half()) / running_mean_train_error.mean_first_half() < 0.00))
         {
-          log("stagnated, stopping");
-          break;
+          log("stagnated, decreasing");
+          learning_rate /= sqrt(2.0);
+          running_mean_train_error.reset();
+          log2("new learningrate: ", learning_rate);
+          //break;
         }
+      if (learning_rate < learning_rate_threshold) {
+          log("learning_threshold reached, stopping");
+    	  break;
+      }
     }
     
   if (save_dir.size())
@@ -190,6 +198,8 @@ void do_stuff()
 
 int main(int argc, char **argv)
 {
+	cout << clock() << endl;
+	exit(1);
   srand(time(0));
   cout.precision(4);
     
