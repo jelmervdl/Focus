@@ -198,8 +198,6 @@ void do_stuff()
 
 int main(int argc, char **argv)
 {
-	cout << clock() << endl;
-	exit(1);
   srand(time(0));
   cout.precision(4);
     
