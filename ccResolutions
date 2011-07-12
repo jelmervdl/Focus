@@ -1,0 +1,20 @@
+#& -l --md5 -a"-Wall -Wno-write-strings -O1 -L$HOME/sfml/bin/lib  -I$HOME/autoencoder/yaml-cpp-0.2.5/include -l Xrandr -m32 "
+
+#USE SFML
+#& -l --md5 -a"-Wall -Wno-write-strings -O1 -L$HOME/sfml/bin/lib  -I$HOME/autoencoder/yaml-cpp-0.2.5/include -l sfml-window -l sfml-graphics -l sfml-system -l Xrandr -m32 "
+
+#OSX 
+##& -l --md5 -a"-Wall -m32 -Wno-write-strings -fast -F/Library/Frameworks/ -framework sfml-window -framework sfml-graphics -framework sfml-system -framework OpenGL -m32"
+
+assert.h 
+math.h 
+time.h 
+ctype.h 
+SFML/Graphics.hpp	
+SFML/System.hpp	
+SFML/Window.hpp	
+boost/random.hpp	
+SFML/Audio.hpp	
+opencv/cv.h	
+stdint.h	
+stdlib.h	

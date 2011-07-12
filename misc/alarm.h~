@@ -1,0 +1,38 @@
+#ifndef __ALARM_H_
+#define __ALARM_H_
+
+#include <time.h>
+
+class Alarm
+{
+  size_t d_last_time, d_alarm_time;
+  size_t d_wait_time;
+  bool d_auto_set;
+
+ Alarm(size_t wait_time, bool auto_set = true) 
+   : 
+  d_last_time(0), 
+    d_alarm_time(0), 
+    d_wait_time(wait_time),
+    d_auto_set(false)
+  {
+    set();
+  }
+
+  void set()
+  {
+    d_last_time = time(0);
+    d_alarm_time = d_last_time + d_wait_time;
+  }
+  
+  bool operator()()
+  {
+    bool alarm = time(0) > d_alarm_time;
+    if (alarm && d_auto_set)
+      set();
+    return alarm;
+  }
+
+};
+
+#endif

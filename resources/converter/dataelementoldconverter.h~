@@ -1,0 +1,50 @@
+#ifndef __DATAELEMENT_OLD_CONVERTER__
+#define __DATAELEMENT_OLD_CONVERTER__
+
+#include "converter.h"
+#include "../../datastructs/dataelementold.h"
+#include <sstream>
+
+class DataElementOldConverter : public Converter<DataElementOld>
+{
+ public:
+    DataElementOldOldConverter(Context &context) : Converter<DataElementOld>(context) {}
+    
+    DataElementOld *operator()(std::istream &in)
+    {
+        DataElementOld *element_ptr = new DataElementOld();
+        DataElementOld &element = *element_ptr;
+        
+        element.data = byte_read_vector_old<float>(in);
+        size_t map_n = byte_read<size_t>(in);
+        for (size_t i(0); i < map_n; ++i)
+        {
+            std::string name(byte_read<std::string>(in));
+            std::string value(byte_read<std::string>(in));
+            
+            element.meta_data[name] = value;
+        }
+        return element_ptr;
+    }
+    
+    std::istream *operator()(DataElementOld &in)
+    {
+        std::stringstream *ioss_ptr = new std::stringstream();
+        std::stringstream &ioss = *ioss_ptr;
+        
+        byte_write_vector(ioss, in.data);
+        byte_write<size_t>(ioss, in.meta_data.size());
+        Context::const_iterator it(in.meta_data.begin()), end(in.meta_data.end());
+        
+        for (; it != end; ++it)
+        {
+            byte_write(ioss, it->first);
+            byte_write(ioss, it->second);
+        }
+        
+        return ioss_ptr;
+    }
+    
+};
+
+#endif

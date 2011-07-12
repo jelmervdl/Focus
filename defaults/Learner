@@ -1,0 +1,2 @@
+Learner:
+    lock_layer_n_steps = 50000

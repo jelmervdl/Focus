@@ -1,0 +1,9 @@
+#ifndef __IMAGE_PACKAGE__
+#define __IMAGE_PACKAGE__
+
+#include "pamimage.h"
+#include "pixelresource.h"
+#include "transformations.h"
+#include "presenter.h"
+
+#endif

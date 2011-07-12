@@ -1,0 +1,19 @@
+#ifndef __MISC_PACKAGE__
+#define __MISC_PACKAGE__
+
+#include "pamImage.h"
+//#include "all2image.h"
+#include "bytewrite.h"
+#include "general.h"
+#include "errors/errors_package.h"
+#include "context.h"
+#include "auto_vector.h"
+#include "smart_vector.h"
+#include "smart_pointer.h"
+#include "context.h"
+#include "contextual.h"
+#include "yaml_reader.h"
+#include "conditions.h"
+#include "string/string"
+
+#endif

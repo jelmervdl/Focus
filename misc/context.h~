@@ -1,0 +1,18 @@
+#ifndef __CONTEXT__
+#define __CONTEXT__
+
+#include <string>
+#include <map>
+#include <iostream>
+
+class Context : public std::map<std::string, std::string>
+{
+ public:
+    void print()
+    {
+        for (Context::iterator it = this->begin(); it != this->end(); ++it)
+            std::cout << it->first << " " << it->second << std::endl;
+    }
+};
+
+#endif

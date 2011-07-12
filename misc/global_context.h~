@@ -1,0 +1,6 @@
+#include "context.h"
+
+class GlobalContext
+{
+  
+};

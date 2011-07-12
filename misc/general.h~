@@ -1,0 +1,224 @@
+#ifndef __GENERAL1__
+#define __GENERAL1__
+
+//file for general functions
+#include <fstream>
+#include <string>
+#include <vector>
+#include <map>
+#include <string>
+#include <sstream>
+#include <iostream>
+#include <iterator>
+#include <algorithm>
+#include <numeric>
+#include <ios>
+#include <stdlib.h>
+#include <math.h>
+#include <assert.h>
+#include <iomanip>
+
+#include "pamImage.h"
+#include "smart_pointer.h"
+#include "../flow/destructable.h"
+#include "../constants.h"
+#include "log.h"
+
+typedef std::map<std::string, std::string> string_map;
+typedef std::pair<std::string, std::string> string_pair;
+
+inline string_pair split(std::string in, std::string splitter)
+{
+  size_t pos = in.find(splitter);
+  if (pos == std::string::npos)
+    return string_pair(in, "");
+  return string_pair(in.substr(0, pos), in.substr(pos + splitter.size()));
+}
+
+inline std::string get_temporary_filename()
+{
+    return tmpnam(NULL);
+}
+
+template <typename T>
+std::vector<T> vector_difference(std::vector<T> const &v1, std::vector<T> const &v2)
+{
+  assert(v1.size() == v2.size());
+  std::vector<T> result(v1);
+  typename std::vector<T>::const_iterator it_1(v1.begin()),
+    end_1(v1.end()), it_2(v2.begin());
+  typename std::vector<T>::iterator it_result(result.begin());
+
+  for (; it_1 != end_1; ++it_1, ++it_2, ++it_result)
+      *it_result = *it_1 - *it_2;
+  return result;
+}
+
+template <typename T>
+T vector_std(std::vector<T> const &v1)
+{
+  typename std::vector<T>::const_iterator it_1(v1.begin()), end_1(v1.end());
+
+  T total(0.0);
+
+  for (; it_1 != end_1; ++it_1)
+      total += *it_1 * *it_1;
+  total /= v1.size();
+  total = sqrt(total);
+  return total;
+}
+
+template <typename T>
+T vector_mean(std::vector<T> const &v1)
+{
+  return std::accumulate(v1.begin(), v1.end(), 0.0) / v1.size();
+}
+
+template <typename T>
+std::vector<T> vector_concat(std::vector<T> const &v1, std::vector<T> const &v2)
+{
+    std::vector<T> new_vec(v1);
+    std::copy(v2.begin(), v2.end(), std::back_inserter(new_vec));
+    return new_vec;
+}
+
+template <typename T>
+std::vector<T> vector_salt_pepper_noise(std::vector<T> const &v1, float salt_probability, float pepper_probability)
+{
+  std::vector<T> new_v(v1);
+  
+  std::vector<bool> pepper_vec(v1.size(), false);
+  std::vector<bool> salt_vec(v1.size(), false);
+  
+  std::fill(pepper_vec.begin(), pepper_vec.begin() + pepper_vec.size() * pepper_probability, true);
+  std::fill(salt_vec.begin(), salt_vec.begin() + salt_vec.size() * salt_probability, true);
+  std::random_shuffle(pepper_vec.begin(), pepper_vec.end());
+  std::random_shuffle(salt_vec.begin(), salt_vec.end());
+  
+  typename std::vector<T>::iterator it(new_v.begin()), it_end(new_v.end());
+  typename std::vector<bool>::const_iterator salt_it(salt_vec.begin()), pepper_it(pepper_vec.begin());
+  
+  for (; it != it_end; ++it, ++salt_it, ++pepper_it)
+    *it = *pepper_it ? picture_to_float_min : (*salt_it ? picture_to_float_max : *it);
+
+  return new_v;
+}
+
+template <typename T>
+inline std::vector<T> string_to_vector(std::string in)
+{
+  size_t start = in.find("[");
+  size_t end = in.find("]");
+  assert(start != std::string::npos && end != std::string::npos);
+  
+  std::string temp_string = in.substr(start + 1, end);
+  std::vector<T> result_vector;
+  
+  while (true)
+    {
+      string_pair a_pair(split(temp_string, ","));
+      result_vector.push_back(string_to_t<T>(a_pair.first));
+
+      if (a_pair.second.size() > 0)
+        temp_string = a_pair.second;
+      else
+        break;
+    }
+  return result_vector;
+}
+
+template <typename T>
+inline T &last(std::vector<T> &some_vec)
+{
+    return *(some_vec.end() - 1);
+}
+
+template <typename T>
+inline T const &last(std::vector<T> const &some_vec)
+{
+    return *(some_vec.end() - 1);
+}
+
+template <typename T>
+T &cast_destructable(smart_pointer<Destructable> &element)
+{
+    return *reinterpret_cast<T*>(element.ptr());
+}
+
+inline void copy_stream(std::istream &in, std::ostream &out)
+{
+    std::istreambuf_iterator<char> i_it(in);
+    std::istreambuf_iterator<char> i_end;
+    
+    std::ostream_iterator<char> o_it(out);
+    
+    std::copy(i_it, i_end, o_it);
+}
+
+
+inline void remove_file(std::string filename)
+{
+    std::string command = std::string("rm -f ") + filename;
+    system(command.c_str());
+}
+
+class PamImage;
+
+void show_image(PamImage image);
+void show_image(std::vector<float> const &v, size_t width = 0, size_t height = 0);
+
+inline std::vector<std::string> ls(std::string dir)
+{
+    std::string temp_file = get_temporary_filename();
+    std::vector<std::string> filenames;
+    
+    std::string command = std::string("ls -l ") + dir + " >" + temp_file;
+    std::cout << "command: " << command << std::endl;
+    system(command.c_str());
+    
+    std::ifstream results_file(temp_file.c_str());
+    
+    {   //skip first line
+        std::string line;
+        getline(results_file, line);
+    }
+
+    while (true)
+    {
+        std::string line;
+        getline(results_file, line);
+        if (results_file.eof())
+            break;
+        {
+            int pos(0);
+            while ((pos = line.find(" ")) >= 0)
+               line = line.substr(pos + 1, line.size());
+            if (line.size())
+                filenames.push_back(line);
+        }
+        
+    }
+    return filenames;
+}
+
+template <typename T>
+inline T random_value(T min_value, T max_value)
+{
+    T random_value = (max_value - min_value) * (1.0 * rand() / RAND_MAX) + min_value;
+    return random_value;
+}
+
+template <typename T>
+class Mean
+{
+    T d_total;
+    size_t d_n;
+ 
+  public:    
+    Mean() : d_total(0), d_n(0){}
+    void update(T t){d_total += t, ++d_n;}
+    T mean(){return d_total / d_n;}
+    void reset(){d_total = 0; d_n = 0;}
+};
+
+#endif
