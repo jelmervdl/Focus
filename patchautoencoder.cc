@@ -54,7 +54,7 @@ SmartVector<DataElement> get_normalized_collection(std::string dir_name)
   return collection;
 }
 
-void do_stuff()
+float do_stuff()
 {
   string resource_dir_name(context.get<string>("dir"));
 
@@ -95,10 +95,16 @@ void do_stuff()
   assert(selection.size() == collection.size());
 
   RunningMean<float> running_mean_train_error(60);
+
+  //for fixing the x and y pos in the dataset
+  vector<float> x_pos(collection.size());
+  vector<float> y_pos(collection.size());
+
+
   for (size_t epoch(0); epoch < n_epochs; ++epoch)
     {
 
-      log2("epoch: ", epoch, EXTRA);
+//      log2("epoch: ", epoch, EXTRA);
       auto_encoder.set_learning_rate(learning_rate);
         
       std::vector<int> index_map(collection.size());
@@ -109,15 +115,23 @@ void do_stuff()
       for (size_t i(0); i < collection.size(); ++i) //training
         {
           int index = index_map[i];
+          DataElement &data_element(*collection[index]);
+
+          if (!x_pos[index]) {
+        	  x_pos[index] = data_element.get_meta<float>(face_part + "_x") + get_random_uniform(0.0, deviation);
+        	  y_pos[index] = data_element.get_meta<float>(face_part + "_y") + get_random_uniform(0.0, deviation);
+          }
           if (!selection[index]) //skip test
             continue;
             
-          DataElement &data_element(*collection[index]);
             
           Focus focus(data_element);
-          float x = data_element.get_meta<float>(face_part + "_x");
-          float y = data_element.get_meta<float>(face_part + "_y");
-            
+
+
+          float x(x_pos[index]);
+          float y(y_pos[index]);
+          assert(x && y);
+
           for (size_t n(0); n < patches_per_face; ++n)
             {
               FocusState focus_state(x + get_random_uniform(0.0, deviation), y + get_random_uniform(0, deviation), radius);
@@ -138,8 +152,9 @@ void do_stuff()
           DataElement &data_element(*collection[i]);
             
           Focus focus(data_element);
-          float x = data_element.get_meta<float>(face_part + "_x");
-          float y = data_element.get_meta<float>(face_part + "_y");
+          float x(x_pos[i]);
+          float y(y_pos[i]);
+          assert(x && y);
           FocusState focus_state(x + get_random_uniform(0.0, test_deviation), y + get_random_uniform(0, test_deviation), radius);
             
           vector<float> data = focus.focus_vector(focus_state);
@@ -158,8 +173,9 @@ void do_stuff()
           DataElement &data_element(*collection[i]);
             
           Focus focus(data_element);
-          float x = data_element.get_meta<float>(face_part + "_x");
-          float y = data_element.get_meta<float>(face_part + "_y");
+          float x(x_pos[i]);
+          float y(y_pos[i]);
+          assert(x && y);
           FocusState focus_state(x + get_random_uniform(0.0, test_deviation), y + get_random_uniform(0, test_deviation), radius);
           vector<float> data = focus.focus_vector(focus_state);
             
@@ -170,20 +186,24 @@ void do_stuff()
         }
         
       running_mean_train_error.update(mean_train_error.mean());
-      log2("train error: ", mean_train_error.mean());
-      log2("test  error: ", mean_test_error.mean());
+//      log2("train error: ", mean_train_error.mean());
+//      log2("test  error: ", mean_test_error.mean());
 
       if (running_mean_train_error.full() && 
           ((running_mean_train_error.mean_first_half() - running_mean_train_error.mean_second_half()) / running_mean_train_error.mean_first_half() < 0.00))
         {
-          log("stagnated, decreasing");
+    	  cout << ".";
+//          log("stagnated, decreasing");
           learning_rate /= sqrt(2.0);
           running_mean_train_error.reset();
-          log2("new learningrate: ", learning_rate);
+//          log2("new learningrate: ", learning_rate);
           //break;
         }
       if (learning_rate < learning_rate_threshold) {
           log("learning_threshold reached, stopping");
+          log2("train error: ", mean_train_error.mean());
+          log2("test  error: ", mean_test_error.mean());
+          return mean_test_error.mean();
     	  break;
       }
     }
@@ -211,8 +231,14 @@ int main(int argc, char **argv)
     {
       context[argv[i]] = argv[i + 1];
     }
-    
-  do_stuff();
-    
+
+
+  vector<float> rmse_vec;
+  while (true) {
+	  rmse_vec.push_back(do_stuff());
+	  cout << "mean: " << vector_mean(rmse_vec) << endl;
+	  cout << "std:  " << vector_std(rmse_vec) << endl;
+	  cout << "size: " << rmse_vec.size() << endl;
+  }
   return 0;
 }
