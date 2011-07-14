@@ -94,12 +94,12 @@ float do_stuff()
   log2("collection size: ", collection.size());
   assert(selection.size() == collection.size());
 
-  RunningMean<float> running_mean_train_error(60);
+  RunningMean<float> running_mean_train_error(30);
 
   //for fixing the x and y pos in the dataset
   vector<float> x_pos(collection.size());
   vector<float> y_pos(collection.size());
-
+  float last_test_rmse(0.0);
 
   for (size_t epoch(0); epoch < n_epochs; ++epoch)
     {
@@ -203,9 +203,11 @@ float do_stuff()
           log("learning_threshold reached, stopping");
           log2("train error: ", mean_train_error.mean());
           log2("test  error: ", mean_test_error.mean());
+          return last_test_rmse; //use previous rmse, otherwise it is biased to a high value
           return mean_test_error.mean();
     	  break;
       }
+      last_test_rmse = mean_test_error.mean();
     }
     
   if (save_dir.size())
