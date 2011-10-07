@@ -1,4 +1,4 @@
-#& -l --md5 -a"-Wall -Wno-write-strings -O1 -L$HOME/sfml/bin/lib  -I$HOME/autoencoder/yaml-cpp-0.2.5/include"
+#& -l --md5 -a"-Wall -Wno-write-strings -O1"
 #& -l --md5 -a"-Wall -Wno-write-strings -O1 -L$HOME/sfml/bin/lib  -I$HOME/autoencoder/yaml-cpp-0.2.5/include -l Xrandr -m32 "
 
 #USE SFML
