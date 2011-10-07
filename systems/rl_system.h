@@ -1,14 +1,14 @@
-#ifndef __FOCUSSYSTEM_H__
-#define __FOCUSSYSTEM_H__
+#ifndef __RLSYSTEM_H__
+#define __RLSYSTEM_H__
 
 #include "../datastructs/datastructs_package.h"
 #include "../misc/misc_package.h"
 #include "neuralnetwork.h"
 
-class FocusSystem
+class RLSystem
 {
-    friend void byte_write<>(std::ostream &out, FocusSystem const &focus_system);
-    friend FocusSystem byte_read<FocusSystem>(std::istream &in);
+    friend void byte_write<>(std::ostream &out, RLSystem const &focus_system);
+    friend RLSystem byte_read<RLSystem>(std::istream &in);
 public:
     float d_alpha, d_beta, d_gamma, d_max_step;
     bool d_just_activated;
@@ -19,7 +19,7 @@ public:
     Conditions d_conditions;
     
 public:
-    FocusSystem()
+    RLSystem()
     :
     d_alpha(0.0),
     d_beta(0.0),
@@ -204,7 +204,7 @@ public:
 };
 
 template <>
-inline void byte_write(std::ostream &out, FocusSystem const &focus_system)
+inline void byte_write(std::ostream &out, RLSystem const &focus_system)
 {
     byte_write<>(out, focus_system.d_alpha);
     byte_write<>(out, focus_system.d_beta);
@@ -218,9 +218,9 @@ inline void byte_write(std::ostream &out, FocusSystem const &focus_system)
 }
 
 template <>
-inline FocusSystem byte_read<FocusSystem>(std::istream &in)
+inline RLSystem byte_read<RLSystem>(std::istream &in)
 {
-    FocusSystem focus_system;
+    RLSystem focus_system;
     
     focus_system.d_alpha = byte_read<float>(in);
     focus_system.d_beta = byte_read<float>(in);

@@ -6,6 +6,6 @@
 #include "neuralnetwork.h"
 #include "autoencoder.h"
 #include "kautoencoder.h"
-#include "focus_system.h"
+#include "rl_system.h"
 #include "convolutionlayer.h"
 #endif

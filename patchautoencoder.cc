@@ -236,7 +236,7 @@ int main(int argc, char **argv)
 
 
   vector<float> rmse_vec;
-  while (true) {
+  for (size_t i(0); i < 20; ++i) {
 	  rmse_vec.push_back(do_stuff());
 	  cout << "mean: " << vector_mean(rmse_vec) << endl;
 	  cout << "std:  " << vector_std(rmse_vec) << endl;

@@ -1,15 +1,15 @@
-#include "focus_system.h"
+#include "rl_system.h"
 
-void FocusSystem::save(std::string filename)
+void RLSystem::save(std::string filename)
 {
   std::ofstream out(filename.c_str());
-  byte_write<FocusSystem>(out, *this);
+  byte_write<RLSystem>(out, *this);
 }
 
-void FocusSystem::load(std::string filename)
+void RLSystem::load(std::string filename)
 {
   std::ifstream in(filename.c_str());
-  *this = byte_read<FocusSystem>(in);
+  *this = byte_read<RLSystem>(in);
   
     d_conditions.ok("alpha", true);
     d_conditions.ok("beta", true);
