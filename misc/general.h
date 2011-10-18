@@ -370,10 +370,34 @@ class Mean
     unsigned int d_n;
  
   public:    
-    Mean() : d_total(0), d_n(0){}
-    void update(T t){d_total += t, ++d_n;}
-    T mean(bool do_reset = false){float a_mean = d_total / d_n; if (do_reset) reset(); return a_mean;}
-    void reset(){d_total = 0; d_n = 0;}
+    Mean()
+    :
+      d_total(0),
+      d_n(0)
+    {
+        //
+    }
+
+    void update(T t)
+    {
+        d_total += t, ++d_n;
+    }
+    
+    T mean(bool do_reset = false)
+    {
+        float a_mean = d_total / d_n;
+
+        if (do_reset)
+            reset();
+        
+        return a_mean;
+    }
+    
+    void reset()
+    {
+        d_total = 0;
+        d_n = 0;
+    }
 };
 
 template <typename T>

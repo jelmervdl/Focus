@@ -34,7 +34,10 @@ void NeuralLayer::init(InitTypes init_type)
 
 void NeuralLayer::activate()
 {
-    value_vector::iterator output_it(d_output_activation.begin()), output_end(d_output_activation.end());
+    value_vector::iterator
+        output_it(d_output_activation.begin()), // CHANGES
+        output_end(d_output_activation.end());
+
     value_vector::const_iterator bias_it(d_bias.begin());
     
     uint32_t output_n(0);
@@ -42,8 +45,9 @@ void NeuralLayer::activate()
     
     for (;output_it != output_end; ++output_it, ++bias_it, ++output_n)
     {
-        value_vector::const_iterator input_it(d_input_activation.begin()), input_end(d_input_activation.end());
-        
+        value_vector::const_iterator
+            input_it(d_input_activation.begin()),
+            input_end(d_input_activation.end());
         
         weight_type activation(*bias_it);
         
@@ -64,18 +68,31 @@ void NeuralLayer::back_propagate(value_vector const &diff, weight_type learn_fac
     
     bool const weights_are_locked(d_weights_are_locked);
     
-    weight_type const learning_rate(use_relative_learning_rate ? learn_factor / sqrt(d_input_activation.size()) : learn_factor);
+    weight_type const learning_rate(use_relative_learning_rate
+        ? learn_factor / sqrt(d_input_activation.size())
+        : learn_factor);
 
     value_vector norm_diff(diff);
+
+    // d-l1-factor has to do with the sparse encoding thingy.
     if (d_l1_factor != 0.0)
     {
-        float dot_product(0.0), l1_length(0.0), adjust_length(0.0);
-        value_vector::const_iterator output_it(d_output_activation.begin()), output_end(d_output_activation.end());
-        value_vector::iterator diff_it(norm_diff.begin());
+        float
+            dot_product(0.0),
+            l1_length(0.0),
+            adjust_length(0.0);
+        
+        value_vector::const_iterator
+            output_it(d_output_activation.begin()),
+            output_end(d_output_activation.end());
+        
+        value_vector::iterator diff_it(norm_diff.begin()); // CHANGES
         
         for (; output_it != output_end; ++output_it, ++diff_it)
         {
-            float l1_adjust = (*output_it > 0.0) ? d_l1_factor : -d_l1_factor;
+            float l1_adjust = (*output_it > 0.0)
+                ? d_l1_factor
+                : -d_l1_factor;
             
             adjust_length += *diff_it * *diff_it;
             l1_length += l1_adjust * l1_adjust;
@@ -85,24 +102,35 @@ void NeuralLayer::back_propagate(value_vector const &diff, weight_type learn_fac
         }
         
         dot_product /= sqrt(l1_length) * sqrt(adjust_length);
-        d_l1_adjust_angle.update(dot_product);
+        d_l1_adjust_angle.update(dot_product); // CHANGES
     }
     
-    value_vector::const_iterator output_it(d_output_activation.begin()), output_end(d_output_activation.end());
+    value_vector::const_iterator
+        output_it(d_output_activation.begin()),
+        output_end(d_output_activation.end());
+    
     value_vector::const_iterator diff_it(norm_diff.begin());
-    value_vector::iterator bias_it(d_bias.begin());
-    float *weight_it = &weight(0, 0);
+    
+    value_vector::iterator bias_it(d_bias.begin()); // CHANGES
+    
+    float *weight_it = &weight(0, 0); // CHANGES
     
     std::fill(d_adjustments.begin(), d_adjustments.end(), 0.0);
 
     for (;output_it != output_end; ++output_it, ++diff_it, ++bias_it)
     {
-        weight_type temp_adjustment = d_linear_layer ? (*diff_it) : (*diff_it) * (1.0 - (*output_it) * (*output_it)); //linear or tanh layer?
+        weight_type temp_adjustment = d_linear_layer
+            ? (*diff_it)
+            : (*diff_it) * (1.0 - (*output_it) * (*output_it)); //linear or tanh layer?
+        
         if (!weights_are_locked)
             *bias_it -= 0.1 * learning_rate * (temp_adjustment);
+    
+        value_vector::const_iterator
+            input_it(d_input_activation.begin()),
+            input_end(d_input_activation.end());
         
-        value_vector::const_iterator input_it(d_input_activation.begin()), input_end(d_input_activation.end());
-        value_vector::iterator adjustment_it(d_adjustments.begin());
+        value_vector::iterator adjustment_it(d_adjustments.begin()); // CHANGES
     
         for (;input_it != input_end; ++input_it, ++weight_it, ++adjustment_it)
         {
@@ -110,6 +138,7 @@ void NeuralLayer::back_propagate(value_vector const &diff, weight_type learn_fac
             
             if (weights_are_locked)
                 continue;
+            
             weight_type const adjust = learning_rate * (temp_adjustment * (*input_it));    
             *weight_it -= adjust;
         }
