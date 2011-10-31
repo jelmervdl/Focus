@@ -3,7 +3,7 @@
 
 #include <string>
 #include "../misc/misc_package.h"
-
+#include "../datastructs/dataelement.h"
 
 class Collection
 {

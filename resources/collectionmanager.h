@@ -9,6 +9,7 @@
 
 #include "collection.h"
 #include "lfw_collection.h"
+#include "cifarcollection.h"
 
 class CollectionManager
 {
@@ -59,6 +60,8 @@ class CollectionManager
             d_collection_map[name] = new DataElementCollection(name, type, dir);
       else if (type == "old")
             d_collection_map[name] = new DataElementOldCollection(name, type, dir);
+      else if (type == "cifar")
+            d_collection_map[name] = new CifarCollection(name, type, dir);
       else
             throw SimpleException(std::string("unknown collection type: ") + type);
    }
